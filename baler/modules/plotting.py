@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 from tqdm import tqdm
 from tqdm import trange
-import os
 
 
 def loss_plot(path_to_loss_data, output_path, config):
@@ -267,7 +268,9 @@ def plot_2D(project_path, config):
 
     print("=== Plotting ===")
     for ind in trange(num_tiles):
-        if config.model_type == "convolutional":
+        if config.model_type == "convolutional" and config.model_name == "Conv_AE_3D":
+            tile_data_decompressed = data_decompressed[0][0][ind] * 0.04 * 1000
+        elif config.model_type == "convolutional":
             tile_data_decompressed = data_decompressed[ind][0] * 0.04 * 1000
         elif config.model_type == "dense":
             tile_data_decompressed = data_decompressed[ind] * 0.04 * 1000

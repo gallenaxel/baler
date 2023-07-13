@@ -12,16 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import List, Tuple
+
 import numpy as np
 import torch
 from numpy import ndarray
 from sklearn.model_selection import train_test_split
 
-from tqdm import tqdm
-
-from modules import helper
-from modules import models
-from typing import List, Tuple
+from ..modules import helper
+from ..modules import models
 
 
 def save_model(model, model_path: str) -> None:
@@ -68,7 +67,9 @@ def load_model(model_object, model_path: str, n_features: int, z_dim: int):
     model.to(device)
 
     # Loading the state_dict into the model
-    model.load_state_dict(torch.load(str(model_path)), strict=False)
+    model.load_state_dict(
+        torch.load(str(model_path), map_location=device), strict=False
+    )
     return model
 
 

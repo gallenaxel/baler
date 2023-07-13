@@ -14,11 +14,11 @@
 
 import os
 import time
+from math import ceil
 
 import numpy as np
 
-import modules.helper as helper
-from math import ceil
+from .modules import helper
 
 
 def main():
@@ -29,6 +29,7 @@ def main():
         - if --mode=compress: call `perform_compression` and compress the given data using the model trained in `--mode=train`
         - if --mode=decompress: call `perform_decompression` and decompress the compressed file outputted from `--mode=compress`
         - if --mode=plot: call `perform_plotting` and plot the comparison between the original data and the decompressed data from `--mode=decompress`. Also plots the loss plot from the trained network.
+        - if --mode=convert_with_hls4ml: call `helper.perform_hls4ml_conversion` and create an hls4ml project containing the converted model.
 
 
     Raises:
@@ -52,6 +53,8 @@ def main():
         perform_plotting(output_path, config, verbose)
     elif mode == "info":
         print_info(output_path, config)
+    elif mode == "convert_with_hls4ml":
+        helper.perform_hls4ml_conversion(output_path, config)
     else:
         raise NameError(
             "Baler mode "
@@ -120,6 +123,11 @@ def perform_training(output_path, config, verbose: bool):
     model_object = helper.model_init(config.model_name)
     model = model_object(n_features=number_of_columns, z_dim=config.latent_space_size)
     model.to(device)
+
+    if config.model_name == "Conv_AE_3D" and hasattr(
+        config, "compress_to_latent_space"
+    ):
+        model.set_compress_to_latent_space(config.compress_to_latent_space)
 
     if verbose:
         print(f"Model architecture:\n{model}")
@@ -371,7 +379,3 @@ def print_info(output_path, config):
     print("\n ==================================")
 
     ## TODO: Add way to print how much your data has been distorted
-
-
-if __name__ == "__main__":
-    main()

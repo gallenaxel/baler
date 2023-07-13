@@ -55,7 +55,7 @@ COPY ./poetry.lock ./pyproject.toml ./
 RUN poetry install --no-interaction --no-ansi --only-root
 
 # Creating folders, and files for the project:
-COPY ./baler/ __init__.py README.md ./tests/ ./
+COPY ./baler/ README.md ./tests/ ./
 
 # Creating python wheel
 RUN poetry build
@@ -79,4 +79,4 @@ COPY --from=python-base /baler-root/baler/*.py /baler-root/baler/README.md ./
 # Configure run time
 ENV PYTHONUNBUFFERED=1
 WORKDIR /baler-root/
-ENTRYPOINT ["python", "baler"]
+ENTRYPOINT ["python", "-m", "baler"]
