@@ -16,21 +16,30 @@ import matplotlib.gridspec as gridspec
 
 #after_paths = "thesis_jobs_1/thesis_cms_cut_ts0/decompressed_output/decompressed.npz"
 
-after_6x = "thesis_jobs_1/thesis_cms_cut_ts0/decompressed_output/decompressed.npz"
+#after_6x = "thesis_jobs_1/thesis_cms_cut_ts0/decompressed_output/decompressed.npz"
 #############################################################################################################################
-before_path = "Thesis_datasets/HEP_data/cut_cms_data.npz"
+#before_path = "Thesis_datasets/HEP_data/cut_cms_data.npz"
 
-after_paths = "Thesis_datasets/HEP_data/HEP1-MSE-1x-decompressed.npz"
+#after_paths = "Thesis_datasets/HEP_data/HEP1-MSE-1x-decompressed.npz"
 #after_paths =  "Final_paper_1x/decompressed_ts0_1x_pratik_1.npz"
-after_6x = "Thesis_datasets/HEP_data/HEP1-MSE-6x-decompressed.npz"
+#after_6x = "Thesis_datasets/HEP_data/HEP1-MSE-6x-decompressed.npz"
 #############################################################################################################################
+
+before_path = "CHEP_data/new_cms_data_85.npz"
+after_paths = "CHEP_data/decompressed_1x.npz"
+after_6x = "CHEP_data/decompressed_6x.npz"
+
+#############################################################################################################################
+
 z = False
 
-Box_plots = True
+Box_plots = False
 Distributions = False
-response = False
 residual = False
-dist_response = False
+
+response = True
+dist_response = True
+
 
 remove_nans = True
 pt_energy_mass_response = False
@@ -68,8 +77,10 @@ type_list = [
     "int",
 ]
 unit_list = ["[GeV]", "[arb.]","[rad.]","[GeV]", "[Area]", "[GeV]", "[GeV]", "[GeV]", "[GeV]", "[GeV]" ,"[GeV]", "[GeV]", "[#]", "[#]", "[#]", "[#]", "[#]", "[#]" , "[#]" ,"[GeV]", "[GeV]", "[GeV]", "[#]", "[#]"]
-print(len(unit_list))
 unit_list_z = ["[GeV]", "[arb.]" ,"[rad.]", "[GeV]", "[GeV]", "[GeV]", "[GeV]", "[GeV]"]
+
+unit_list_chep = ["[GeV]","[arb.]","[GeV]","[GeV]"]
+name_list_chep = ["pt","eta","mass","Neutral Hadron Energy"]
 Energy_list_HEP1 = [0,2,5,6,7,8,9,10,11,19,20,21]
 Energy_list_HEP2 = [0,3,4,5,6,7]
 
@@ -121,7 +132,8 @@ def plot_distributions(names, before, after):
             pass
 
 
-        ax = plt.subplot(4,2,i+1) # 6,4
+        #ax = plt.subplot(4,2,i+1)
+        ax = plt.subplot(6,4,i+1)
 
         y,x,_ = ax.hist(before[i],bins=100,label="Before")
         ax.set_yscale("log")
@@ -137,7 +149,7 @@ def plot_distributions(names, before, after):
 
     #plt.legend(loc= "upper center", ncol= 2, bbox_to_anchor=[-1.4,7.8])
     #plt.show()
-    plt.savefig("Thesis_z_distributions-16x.pdf")
+    plt.savefig("CHEP_proceed_plot.pdf")
 
 def plot_box_and_whisker(names, after1, after2,before):
     column_names = [i.split(".")[-1] for i in names]
@@ -366,7 +378,7 @@ def plot_box_and_whisker(names, after1, after2,before):
 
     fig1.tight_layout()
     fig1.subplots_adjust(wspace=0.1)
-    plt.savefig("boxplot-thesis-HEP1-MSE-1v6x_redo.pdf")
+    plt.savefig("CHEP.pdf")
 
 
     #plt.show()
@@ -385,6 +397,9 @@ def dist_and_response(names, before, after1,unit_list):
 
     value_to_split = 0 # 0, 4, 8, 12, 16, 20
 
+    chep_indices = [0, 1, 3, 6]
+
+
 
     if value_to_split:
         before = before[value_to_split:,:]
@@ -395,21 +410,23 @@ def dist_and_response(names, before, after1,unit_list):
     RPD = False
     #if RPD:
     #    response1 = 2*np.divide((np.add(before,after1)),(np.add(np.abs(before),np.abs(after1))))
-    if value_to_split == 0:
-        before[[2,3]] = before[[3,2]]
-        after1[[2,3]] = after1[[3,2]]
-        a, b = column_names.index('mass'), column_names.index('phi')
-        column_names[b], column_names[a] = column_names[a], column_names[b]
+    #if value_to_split == 0:
+        #before[[2,3]] = before[[3,2]]
+        #after1[[2,3]] = after1[[3,2]]
+        #a, b = column_names.index('mass'), column_names.index('phi')
+        #column_names[b], column_names[a] = column_names[a], column_names[b]
 
-    #response1 = np.divide(np.subtract(after1, before), before)
-    #response1 = np.subtract(after1, before)
-    response1 = np.divide(after1,before)
+    response1 = np.divide(np.subtract(after1, before), before)
+
+    before = np.array([before[0],before[1],before[3],before[6]])
+    after1 = np.array([after1[0],after1[1],after1[3],after1[6]])
+    response1 = np.array([response1[0],response1[1],response1[3],response1[6]])
+
     fig = plt.figure(figsize=(15,8),constrained_layout=True)
-
     subfigs = fig.subfigures(2, 2)
 
     for outerind, subfig in enumerate(subfigs.flat):
-        subfig.suptitle(f'{column_names[outerind]} {unit_list[outerind]}',fontsize=18)
+        subfig.suptitle(f'{name_list_chep[outerind]} {unit_list_chep[outerind]}',fontsize=18)
         axs = subfig.subplots(1, 2)
         
         for innerind, ax in enumerate(axs.flat):
@@ -418,12 +435,17 @@ def dist_and_response(names, before, after1,unit_list):
                 y,x,_ = ax.hist(before[outerind],bins=100,label="Before")
                 y1,x1,_ = ax.hist(after1[outerind],bins=100,label="After",histtype="step")
                 ax.set_yscale("log")
-                ax.set_ylim(ymin=1,ymax=1.4*y.max())
+                ax.set_ylim(ymin=1,ymax=1.8*y.max())
+
                 if value_to_split == 0:
-                    if outerind == 1 or outerind == 3:
+                    if outerind == 1:
                        ax.set_ylim(1,1e5)
+                       #ax.set_yscale("linear")
+                    if outerind == 3:
+                        ax.set_ylim(1,1e6)
                 ax.set_ylabel("Counts",fontsize=16)
                 ax.legend()
+
 
 
             if innerind == 1:
@@ -434,13 +456,17 @@ def dist_and_response(names, before, after1,unit_list):
                 percentage = 100*(len(response1[outerind]) - len(response_list))/len(response1[outerind])
                 print(f"Amount of values in the response calculation range: {len(response1[outerind])} or {100 - percentage:2f}% of the original")
                 rms = np.sqrt(np.mean(np.square(response_list)))
-                ax.set_title("Residual distribution",fontsize=16)
+                if response:
+                    ax.set_title("Response distribution",fontsize=16)
+                elif residual:
+                    ax.set_title("Residual distribution",fontsize=16)
+                    
                 counts_response, bins_response = np.histogram(
-                response1[outerind], bins=np.arange(-2, 2, 0.05)) # -0.2, 0.2, 0.005
-                #if value_to_split == 0:
-                #    if outerind == 1 or outerind == 3:
-                #        counts_response, bins_response = np.histogram(
-                #    response1[outerind], bins=np.arange(-0.003, 0.003,0.00005))
+                response1[outerind], bins=np.arange(-0.6, 0.6, 0.005)) # -0.2, 0.2, 0.005
+                if value_to_split == 0:
+                    if outerind == 1:# or outerind == 3:
+                        counts_response, bins_response = np.histogram(
+                    response1[outerind], bins=np.arange(-0.003, 0.003,0.00005))
                 ax.hist(
                     bins_response[:-1],
                     bins_response,
@@ -455,24 +481,23 @@ def dist_and_response(names, before, after1,unit_list):
                     label=f"Mean:\n{np.mean(response_list):0.4e}",
                 )
                 ax.plot([], [], " ", label=f"RMS:\n{rms:0.4e}")
-                if infs_nans == 0:
-                        ax.plot([],[], " ", label=f"NaNs & infs\n{infs_nans} = {percentage:0.1f}%")
-                else:
-                    ax.plot([],[], " ", label=f"NaNs & infs\n{infs_nans} \n= {percentage:0.1f}%")
-                ax.set_xlim(-2,2)
-                #ax.set_ylim(0,250000)
-                #if value_to_split == 0:
-                #    if outerind == 0 or outerind == 2:
-                #        ax.set_ylim(0,250000)
-                #    if outerind == 1 or outerind == 3:
-                #        ax.set_xlim(-0.002,0.002)
+                #if infs_nans == 0:
+                #        ax.plot([],[], " ", label=f"NaNs & infs\n{infs_nans} = {percentage:0.1f}%")
+                #else:
+                #    ax.plot([],[], " ", label=f"NaNs & infs\n{infs_nans} \n= {percentage:0.1f}%")
+
+                if value_to_split == 0:
+                    if outerind == 0 or outerind == 2:
+                        ax.set_ylim(0,250000)
+                        ax.set_xlim(-0.2,0.2)
+                    if outerind == 1:# or outerind == 3:
+                        ax.set_xlim(-0.002,0.002)
                 ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
                 ax.legend()
 
-
     #plt.yticks(fontsize=14)
-    plt.savefig(f"dist_vs_ratio_{value_to_split}_6x.pdf")
+    plt.savefig(f"dist_vs_ratio_{value_to_split}_1x.pdf")
     #plt.show()
         
 
@@ -487,7 +512,7 @@ if dist_response:
     #"Final_paper_1x/decompressed_ts0_5.npz"]
     #for i in after_paths:
     #    after99 = np.transpose(np.load(i)["data"])
-    dist_and_response(names,before,after2,unit_list)
+    dist_and_response(names,before,after1,unit_list)
 
 elif Box_plots:
     plot_box_and_whisker(names,after1,after2,before)
